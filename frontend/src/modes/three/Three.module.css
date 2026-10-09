@@ -519,6 +519,132 @@
   color: var(--ink-muted);
 }
 
+/* ------------------------------------------------------------- exhibits */
+
+.explore {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--signal);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--signal) 45%, transparent);
+}
+
+.explore:hover,
+.explore:focus-visible {
+  border-bottom-color: var(--signal);
+}
+
+/* A pinned dive: the section is N viewports tall and its inner panel sticks while scroll drives the camera. */
+.dive {
+  position: relative;
+  height: calc(var(--dive-levels, 5) * 100svh);
+}
+
+.diveStick {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-4);
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: calc(var(--header-h) + var(--space-5)) var(--gutter) var(--space-6);
+  pointer-events: none;
+}
+
+.diveHead {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 34rem;
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.diveTitle {
+  font-size: var(--step-2);
+  font-stretch: 82%;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+/* Depth trail in the empty left column: Motherboard › Package › … with the current level lit. */
+.diveCrumbs {
+  align-self: start;
+  justify-self: start;
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+}
+
+.diveCrumbs li[data-passed="true"] {
+  color: var(--ink-muted);
+}
+
+.diveCrumbs li[aria-current="step"] {
+  color: var(--signal);
+}
+
+.diveCrumbs li[aria-current="step"]::before {
+  content: "▸ ";
+}
+
+.diveCaption {
+  align-self: end;
+  display: grid;
+  gap: var(--space-2);
+  width: min(100%, 30rem);
+  pointer-events: auto;
+}
+
+/* The same levels as a plain list when the 3D dive is not running. */
+.levels {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.levels li {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--line-strong);
+}
+
+@media (max-width: 860px) {
+  /* Small screens: only the current step, so the trail does not crowd the scene. */
+  .diveCrumbs {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .diveCrumbs li:not([aria-current="step"]) {
+    display: none;
+  }
+
+  .diveCaption {
+    width: 100%;
+  }
+}
+
 /* ---------------------------------------------------------- detail pages */
 
 .detail {

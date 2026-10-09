@@ -1,6 +1,10 @@
 /**
  * SceneEngine — the three.js world behind the 3D mode.
  *
+ *   Exhibits: self-contained objects built far above the die (see exhibits/).
+ *   When the camera reaches an exhibit's station the die world is hidden and
+ *   the camera follows the exhibit's own path, driven by setDepths().
+ *
  *   World: a GPU die at the origin (instanced "streaming multiprocessor"
  *   tiles on a procedural floor), memory stacks along its sides, tens of
  *   thousands of GPU-animated data particles flowing in from every direction,
@@ -50,6 +54,10 @@ import {
 } from "three";
 import type { IUniform } from "three";
 
+import { exhibitForKey } from "../exhibits/catalog";
+import { lerpPose } from "../exhibits/dive";
+import { EXHIBIT_FACTORIES } from "../exhibits";
+import type { Exhibit } from "../exhibits/types";
 import type { Palette } from "./palette";
 import { lowerDpr, shouldDegrade } from "./quality";
 import type { QualitySettings } from "./quality";
@@ -152,6 +160,10 @@ export class SceneEngine {
   private readonly nodeMaterial = new MeshBasicMaterial({ transparent: true, depthWrite: false });
   private readonly additive: ShaderMaterial[] = [];
 
+  private palette!: Palette;
+  private readonly exhibits = new Map<string, Exhibit>();
+  private depths: Record<string, number> = {};
+  private near = 0.1;
   private keys: string[] = ["ambient"];
   private poses: Pose[] = [poseFor("ambient")];
   private targetF = 0;
@@ -445,6 +457,7 @@ export class SceneEngine {
   setStations(keys: string[]) {
     this.keys = keys.length ? keys : ["ambient"];
     this.poses = this.keys.map(poseFor);
+    this.ensureExhibits();
     this.targetF = Math.min(this.targetF, this.keys.length - 1);
     this.f = Math.min(this.f, this.keys.length - 1);
     this.requestRender();
@@ -456,6 +469,26 @@ export class SceneEngine {
     this.requestRender();
   }
 
+  /** Dive depth (0 … levels−1) for each exhibit station, by station key. */
+  setDepths(depths: Record<string, number>) {
+    this.depths = depths;
+    this.requestRender();
+  }
+
+  /** Build exhibits on first use, so visitors who never reach one never pay for it. */
+  private ensureExhibits() {
+    if (!this.q.exhibits) return;
+    for (const key of this.keys) {
+      const def = exhibitForKey(key);
+      if (!def || this.exhibits.has(key)) continue;
+      const exhibit = EXHIBIT_FACTORIES[def.id]();
+      if (this.palette) exhibit.setPalette(this.palette);
+      exhibit.root.visible = false;
+      this.scene.add(exhibit.root);
+      this.exhibits.set(key, exhibit);
+    }
+  }
+
   setReveal(v: number) {
     this.reveal = Math.min(Math.max(v, 0), 1);
     this.shared.uReveal.value = this.reveal;
@@ -463,6 +496,8 @@ export class SceneEngine {
   }
 
   setPalette(p: Palette) {
+    this.palette = p;
+    for (const exhibit of this.exhibits.values()) exhibit.setPalette(p);
     const u = this.shared;
     u.uDark.value = p.dark ? 1 : 0;
     (u.uBg.value as Vector3).copy(vec3(p.bg));
@@ -623,7 +658,24 @@ export class SceneEngine {
     // Damped flight toward the scroll target (instant when reduced).
     this.f = reduced ? this.targetF : this.f + (this.targetF - this.f) * (1 - Math.exp(-dt * 4.5));
 
-    const pose = samplePath(this.poses, this.f);
+    const w = stationWeights(this.keys, this.f);
+    let pose = samplePath(this.poses, this.f);
+
+    // An exhibit takes over the camera while its station is in view: blend the page flight
+    // into the exhibit's own descent, which is at full strength when the camera is parked on it.
+    let exhibitWeight = 0;
+    for (const [key, exhibit] of this.exhibits) {
+      const weight = w[key] ?? 0;
+      exhibit.root.visible = weight > 0.004;
+      if (!exhibit.root.visible) continue;
+      const depth = this.depths[key] ?? 0;
+      exhibit.update({ time: this.time, depth, weight, reduced, aspect: this.width / this.height });
+      pose = lerpPose(pose, exhibit.poseAt(depth), weight);
+      exhibitWeight = Math.max(exhibitWeight, weight);
+    }
+    // The die world is nowhere near the exhibit; stop drawing its 40k particles while inside one.
+    this.setWorldVisible(exhibitWeight < 0.98);
+
     const look = vec3(pose.look);
     const pos = vec3(pose.pos);
 
@@ -637,14 +689,25 @@ export class SceneEngine {
     if (aspect < 1) pos.multiplyScalar(1 + (1 - aspect) * 0.75);
     pos.add(look);
 
+    // Exhibits zoom to tiny scales: keep pointer parallax proportional to the viewing distance,
+    // and pull the near plane in so the closest levels are not clipped.
+    const dist = pos.distanceTo(look);
+    const parallaxScale = 1 - exhibitWeight * (1 - Math.min(1, dist / 30));
+    const near = Math.min(0.1, Math.max(0.004, dist * 0.08));
+    if (Math.abs(near - this.near) > this.near * 0.02) {
+      this.near = near;
+      this.camera.near = near;
+      this.camera.updateProjectionMatrix();
+    }
+
     if (this.q.pointerFx && !reduced) {
       const tx = this.pointerActive ? this.pointer.x : 0;
       const ty = this.pointerActive ? this.pointer.y : 0;
       const k = 1 - Math.exp(-dt * 3);
       this.parallax.x += (tx - this.parallax.x) * k;
       this.parallax.y += (ty - this.parallax.y) * k;
-      pos.x += this.parallax.x * 2.4;
-      pos.y += this.parallax.y * 1.2;
+      pos.x += this.parallax.x * 2.4 * parallaxScale;
+      pos.y += this.parallax.y * 1.2 * parallaxScale;
     }
     if (!reduced) {
       // A slow breathing orbit keeps the scene alive between scrolls.
@@ -658,7 +721,6 @@ export class SceneEngine {
     this.camera.lookAt(look);
 
     // Section emphasis.
-    const w = stationWeights(this.keys, this.f);
     this.shared.uStageProjects.value = w.projects ?? 0;
     this.shared.uOut.value = w.contact ?? 0;
     this.ringU.uWeight.value = w.skills ?? 0;
@@ -685,6 +747,11 @@ export class SceneEngine {
       const hover = this.pointerActive && !reduced ? 1 : 0;
       this.substrateU.uHover.value += (hover - (this.substrateU.uHover.value as number)) * (1 - Math.exp(-dt * 5));
     }
+  }
+
+  private setWorldVisible(visible: boolean) {
+    const world = [this.substrate, this.tiles, this.stacks, this.particles, this.pipe, this.nodes, ...this.rings];
+    for (const obj of world) if (obj) obj.visible = visible;
   }
 
   /** Step quality down if frames keep missing the budget (decision D6: auto-degrade). */

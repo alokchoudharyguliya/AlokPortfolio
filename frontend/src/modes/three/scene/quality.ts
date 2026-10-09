@@ -14,12 +14,14 @@ export interface QualitySettings {
   antialias: boolean;
   /** Pointer ripples and parallax. */
   pointerFx: boolean;
+  /** Scroll-driven exhibit dives. Off, the exhibits show as a static list of levels instead. */
+  exhibits: boolean;
 }
 
 const TIERS: Record<Exclude<QualityTier, "none">, QualitySettings> = {
-  high: { tier: "high", grid: 10, particles: 42_000, maxDpr: 2, antialias: true, pointerFx: true },
-  medium: { tier: "medium", grid: 8, particles: 16_000, maxDpr: 1.5, antialias: true, pointerFx: true },
-  low: { tier: "low", grid: 6, particles: 5_000, maxDpr: 1, antialias: false, pointerFx: false },
+  high: { tier: "high", grid: 10, particles: 42_000, maxDpr: 2, antialias: true, pointerFx: true, exhibits: true },
+  medium: { tier: "medium", grid: 8, particles: 16_000, maxDpr: 1.5, antialias: true, pointerFx: true, exhibits: true },
+  low: { tier: "low", grid: 6, particles: 5_000, maxDpr: 1, antialias: false, pointerFx: false, exhibits: false },
 };
 
 /** Settings for a tier, or null when 3D cannot run at all (no WebGL). */

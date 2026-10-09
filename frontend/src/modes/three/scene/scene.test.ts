@@ -153,6 +153,9 @@ describe("quality tiers", () => {
     expect(medium.particles).toBeGreaterThan(low.particles);
     expect(high.grid).toBeGreaterThan(low.grid);
     expect(low.pointerFx).toBe(false);
+    // Exhibit dives need a capable GPU; the low tier shows the static list of levels instead.
+    expect(high.exhibits && medium.exhibits).toBe(true);
+    expect(low.exhibits).toBe(false);
     expect(qualitySettings("none")).toBeNull();
   });
 

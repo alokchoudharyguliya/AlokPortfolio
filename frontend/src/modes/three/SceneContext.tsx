@@ -16,3 +16,15 @@ export const NOOP_SCENE: SceneApi = { highlightProject: () => {}, highlightTier:
 export const SceneContext = createContext<SceneApi>(NOOP_SCENE);
 
 export const useScene = () => useContext(SceneContext);
+
+/**
+ * Whether exhibits can dive: the scene is running, the device is strong enough and motion is
+ * allowed. When false, an exhibit renders as a plain list of its levels instead of a pinned zoom.
+ */
+export interface DiveState {
+  live: boolean;
+}
+
+export const DiveContext = createContext<DiveState>({ live: false });
+
+export const useDive = () => useContext(DiveContext);

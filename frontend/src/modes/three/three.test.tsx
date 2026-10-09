@@ -13,7 +13,7 @@ import { PreferencesProvider } from "@/lib/preferences/PreferencesProvider";
 import { isModeAvailable } from "@/modes/registry";
 
 import { makeBootstrap } from "../terminal/fixtures";
-import { SceneContext } from "./SceneContext";
+import { DiveContext, SceneContext } from "./SceneContext";
 import ThreeLayout from "./ThreeLayout";
 import { HomeView } from "./views";
 
@@ -46,16 +46,21 @@ const bootstrap: Bootstrap = {
   ],
 };
 
-function renderHome(scene = {}) {
+function withExhibit(b: Bootstrap, exhibit = "hardware"): Bootstrap {
+  return { ...b, skills: b.skills.map((c) => ({ ...c, exhibit })) };
+}
+
+function renderHome(scene = {}, data: Bootstrap = bootstrap, dive?: { live: boolean }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const sections = buildSections(bootstrap).filter((s) => !s.isEmpty);
+  const sections = buildSections(data).filter((s) => !s.isEmpty);
+  const home = <HomeView bootstrap={data} sections={sections} />;
   return render(
     <QueryClientProvider client={qc}>
       <MemoryRouter>
         <PreferencesProvider isModeAvailable={isModeAvailable}>
-          <ThreeLayout bootstrap={bootstrap}>
+          <ThreeLayout bootstrap={data}>
             <SceneContext.Provider value={{ highlightProject: () => {}, highlightTier: () => {}, ...scene }}>
-              <HomeView bootstrap={bootstrap} sections={sections} />
+              {dive ? <DiveContext.Provider value={dive}>{home}</DiveContext.Provider> : home}
             </SceneContext.Provider>
           </ThreeLayout>
         </PreferencesProvider>
@@ -144,5 +149,53 @@ describe("3D mode without WebGL", () => {
     expect(screen.getByText("C++")).toHaveAttribute("data-hot", "true");
     expect(screen.getByText("Python")).toHaveAttribute("data-hot", "false");
     expect(screen.getByRole("button", { name: /send message/i })).toBeInTheDocument();
+  });
+
+  describe("exhibits", () => {
+    it("adds no exhibit and no link when no skill group links one", () => {
+      const { container } = renderHome();
+      expect(container.querySelector('[id^="exhibit-"]')).toBeNull();
+      expect(screen.queryByRole("link", { name: /explore/i })).toBeNull();
+    });
+
+    it("links a skill group to its exhibit, which follows the Skills section", () => {
+      const { container } = renderHome({}, withExhibit(bootstrap));
+      const link = screen.getByRole("link", { name: /explore: from the board to the register/i });
+      expect(link).toHaveAttribute("href", "#exhibit-hardware");
+      const ids = [...container.querySelectorAll("section[id]")].map((el) => el.id);
+      expect(ids.indexOf("exhibit-hardware")).toBe(ids.indexOf("skills") + 1);
+    });
+
+    it("ignores an exhibit id it does not know", () => {
+      const { container } = renderHome({}, withExhibit(bootstrap, "teleporter"));
+      expect(container.querySelector("#exhibit-teleporter")).toBeNull();
+      expect(screen.queryByRole("link", { name: /explore/i })).toBeNull();
+    });
+
+    it("without the 3D scene shows the levels as a plain list and adds no camera station", () => {
+      const { container } = renderHome({}, withExhibit(bootstrap));
+      const list = within(container.querySelector("#exhibit-hardware") as HTMLElement).getByRole("list");
+      const levels = within(list).getAllByRole("listitem");
+      expect(levels).toHaveLength(5);
+      expect(levels[0]).toHaveTextContent("Motherboard");
+      expect(levels[4]).toHaveTextContent("Registers");
+      const stations = [...container.querySelectorAll("[data-station]")].map((el) => (el as HTMLElement).dataset.station);
+      expect(stations).not.toContain("exhibit:hardware");
+    });
+
+    it("when live, becomes a pinned station with one breadcrumb entry per level", () => {
+      const { container } = renderHome({}, withExhibit(bootstrap), { live: true });
+      const dive = container.querySelector('[data-station="exhibit:hardware"]') as HTMLElement;
+      expect(dive).not.toBeNull();
+      expect(dive.dataset.diveLevels).toBe("5");
+      const crumbs = within(dive).getByRole("list", { name: "Depth" });
+      const items = within(crumbs).getAllByRole("listitem");
+      expect(items.map((i) => i.textContent)).toEqual(["Motherboard", "CPU package", "Cache hierarchy", "Core", "Registers"]);
+      expect(items[0]).toHaveAttribute("aria-current", "step");
+      expect(within(dive).getByText(/level 1 \/ 5/i)).toBeInTheDocument();
+      // The camera stations (in DOM order) now include the exhibit between skills and contact.
+      const stations = [...container.querySelectorAll("[data-station]")].map((el) => (el as HTMLElement).dataset.station);
+      expect(stations).toEqual(["hero", "about", "experience", "projects", "skills", "exhibit:hardware", "contact"]);
+    });
   });
 });

@@ -188,6 +188,8 @@ export interface SkillCategory extends Orderable {
   name: string;
   description: string;
   icon: string;
+  /** Id of the 3D-mode exhibit this group links to ("" = none); see modes/three/exhibits/catalog.ts. */
+  exhibit?: string;
   skills?: Skill[];
 }
 

@@ -26,6 +26,7 @@ import { LinkButton } from "@/ui/Button";
 
 import { useScene } from "./SceneContext";
 import { useReveal } from "./useReveal";
+import { exhibitForKey, exhibitKey, isExhibitId } from "./exhibits/catalog";
 import { ringCount, tierRing } from "./scene/stations";
 import styles from "./Three.module.css";
 
@@ -300,6 +301,7 @@ export function SkillsStation({ model, side }: SectionProps<"skills"> & { side: 
                   </span>
                   <h3 className={styles.itemTitle}>{cat.name}</h3>
                   {cat.description ? <p className={styles.muted}>{cat.description}</p> : null}
+                  <ExhibitLink id={cat.exhibit} />
                   <ul className={styles.chips} aria-label={`${cat.name} skills`}>
                     {(cat.skills ?? []).map((s) => (
                       <li key={s.id} data-hot={s.is_highlighted}>
@@ -314,5 +316,17 @@ export function SkillsStation({ model, side }: SectionProps<"skills"> & { side: 
         </section>
       </EditableSection>
     </Station>
+  );
+}
+
+/** "Explore in 3D" link from a skill group to its exhibit, when the owner linked one. */
+function ExhibitLink({ id }: { id: string | undefined }) {
+  if (!isExhibitId(id)) return null;
+  const exhibit = exhibitForKey(exhibitKey(id));
+  if (!exhibit) return null;
+  return (
+    <a className={styles.explore} href={`#exhibit-${id}`}>
+      Explore: {exhibit.title} <span aria-hidden>↓</span>
+    </a>
   );
 }

@@ -90,6 +90,13 @@ const PROJECT_CATEGORY = [
   ["other", "Other"],
 ].map(([value, label]) => ({ value, label }));
 
+/** 3D-mode exhibits a skill group can link to. Keep ids in sync with modes/three/exhibits/catalog.ts (a test checks). */
+export const EXHIBIT_OPTIONS = [
+  ["hardware", "Hardware: motherboard to registers"],
+  ["cuda", "CUDA: GPU to a single thread"],
+  ["transformer", "Transformer: stack to softmax"],
+].map(([value, label]) => ({ value, label }));
+
 const PROJECT_STATUS = [
   ["completed", "Completed"],
   ["in_progress", "In progress"],
@@ -383,6 +390,12 @@ export const RESOURCES: Record<string, ResourceDef> = {
       { name: "name", label: "Name", type: "text", required: true },
       { name: "description", label: "Description", type: "text", wide: true },
       { name: "icon", label: "Icon key", type: "text" },
+      {
+        name: "exhibit",
+        label: "3D exhibit",
+        type: "select",
+        options: [{ value: "", label: "None" }, ...EXHIBIT_OPTIONS],
+      },
     ],
   },
   skills: {

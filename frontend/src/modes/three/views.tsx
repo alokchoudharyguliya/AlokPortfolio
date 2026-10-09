@@ -4,6 +4,7 @@
  * a glass panel for the rest). Detail pages reuse Simple's article views
  * inside a panel while the scene idles behind them.
  */
+import { Fragment } from "react";
 import type { ComponentType } from "react";
 
 import type { Bootstrap, SectionKey } from "@/api/types";
@@ -21,6 +22,8 @@ import { BlogIndexView as SimpleBlogIndex, NotFoundView as SimpleNotFound, PostV
 import type { SectionProps } from "@/modes/types";
 import { useSudo } from "@/sudo/SudoProvider";
 
+import { ExhibitStation } from "./exhibits/ExhibitStation";
+import { linkedExhibits } from "./exhibits/catalog";
 import { DetailPanel, ExperienceStation, HeroStation, ProjectsStation, SkillsStation, Station } from "./sections";
 import type { Side } from "./sections";
 
@@ -56,7 +59,15 @@ export function HomeView({ bootstrap, sections }: { bootstrap: Bootstrap; sectio
           case "projects":
             return <ProjectsStation key={model.key} model={model} bootstrap={bootstrap} side={side} />;
           case "skills":
-            return <SkillsStation key={model.key} model={model} bootstrap={bootstrap} side={side} />;
+            // Skill groups can link an exhibit; each one follows as a pinned interlude.
+            return (
+              <Fragment key={model.key}>
+                <SkillsStation model={model} bootstrap={bootstrap} side={side} />
+                {linkedExhibits(model.data.categories).map((exhibit) => (
+                  <ExhibitStation key={exhibit.id} exhibit={exhibit} />
+                ))}
+              </Fragment>
+            );
           default: {
             const Reused = REUSED[model.key];
             if (!Reused) return null;

@@ -34,7 +34,7 @@ export function parseCssColor(input: string): Vec3 | null {
   return channels.every((c) => Number.isFinite(c)) ? (channels.map((c) => Math.min(1, Math.max(0, c))) as Vec3) : null;
 }
 
-const FALLBACK: Palette = {
+export const FALLBACK_PALETTE: Palette = {
   dark: true,
   bg: [0.043, 0.11, 0.173],
   surface: [0.063, 0.149, 0.227],
@@ -57,13 +57,13 @@ export function readPalette(el: HTMLElement = document.documentElement): Palette
   const get = (name: string, fallback: Vec3): Vec3 => parseCssColor(css.getPropertyValue(name)) ?? fallback;
   return {
     dark: el.dataset.theme !== "light",
-    bg: get("--bg", FALLBACK.bg),
-    surface: get("--bg-raised", FALLBACK.surface),
-    surface2: get("--bg-sunken", FALLBACK.surface2),
-    ink: get("--ink", FALLBACK.ink),
-    muted: get("--ink-muted", FALLBACK.muted),
-    signal: get("--signal", FALLBACK.signal),
-    flame: [get("--flame-1", FALLBACK.flame[0]), get("--flame-2", FALLBACK.flame[1]), get("--flame-3", FALLBACK.flame[2]), get("--flame-4", FALLBACK.flame[3])],
-    link: get("--link", FALLBACK.link),
+    bg: get("--bg", FALLBACK_PALETTE.bg),
+    surface: get("--bg-raised", FALLBACK_PALETTE.surface),
+    surface2: get("--bg-sunken", FALLBACK_PALETTE.surface2),
+    ink: get("--ink", FALLBACK_PALETTE.ink),
+    muted: get("--ink-muted", FALLBACK_PALETTE.muted),
+    signal: get("--signal", FALLBACK_PALETTE.signal),
+    flame: [get("--flame-1", FALLBACK_PALETTE.flame[0]), get("--flame-2", FALLBACK_PALETTE.flame[1]), get("--flame-3", FALLBACK_PALETTE.flame[2]), get("--flame-4", FALLBACK_PALETTE.flame[3])],
+    link: get("--link", FALLBACK_PALETTE.link),
   };
 }

@@ -11,6 +11,8 @@
  *   fractional index ──► samplePath(): Catmull–Rom through the station poses
  */
 
+import { exhibitForKey } from "../exhibits/catalog";
+
 export type Vec3 = [number, number, number];
 
 export interface Pose {
@@ -39,7 +41,8 @@ export const POSES: Record<string, Pose> = {
   ambient: { pos: [0, 14, 40], look: [0, 1, 0] },
 };
 
-export const poseFor = (key: string): Pose => POSES[key] ?? POSES.ambient;
+/** Exhibit stations (`exhibit:<id>`) rest on their catalogue's wide shot until the dive starts. */
+export const poseFor = (key: string): Pose => POSES[key] ?? exhibitForKey(key)?.wide ?? POSES.ambient;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 

@@ -19,6 +19,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import type { Bootstrap } from "@/api/types";
 import { buildSections } from "@/domain/sections";
+import { qualityTier } from "@/lib/device";
 import { SmoothScroll } from "@/lib/motion/SmoothScroll";
 import { useReducedMotion } from "@/lib/motion/useReducedMotion";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
@@ -28,10 +29,11 @@ import { Button } from "@/ui/Button";
 import { ModeSwitcher } from "@/ui/ModeSwitcher";
 import { ThemeToggle } from "@/ui/ThemeToggle";
 
-import { SceneContext } from "./SceneContext";
+import { DiveContext, SceneContext } from "./SceneContext";
 import type { SceneApi } from "./SceneContext";
 import { readoutFor } from "./readout";
 import type { Readout } from "./readout";
+import { qualitySettings } from "./scene/quality";
 import styles from "./Three.module.css";
 import { useSceneEngine } from "./useSceneEngine";
 import { useScrollFlight } from "./useScrollFlight";
@@ -56,8 +58,17 @@ export default function ThreeLayout({ bootstrap, children }: { bootstrap: Bootst
     [bootstrap, editing],
   );
   const [active, setActive] = useState(0);
-  const onStation = useCallback((i: number) => setActive(i), []);
+  // Exhibit stations are not rail entries; while one is in view the rail keeps its last section lit.
+  const onStation = useCallback(
+    (_index: number, key: string) => {
+      const i = stations.findIndex((s) => s.key === key);
+      if (i >= 0) setActive(i);
+    },
+    [stations],
+  );
   useScrollFlight(engineRef, home, `${stations.map((s) => s.key).join(",")}|${reduced}`, failed, onStation);
+
+  const dive = useMemo(() => ({ live: !failed && !reduced && qualitySettings(qualityTier())?.exhibits === true }), [failed, reduced]);
 
   const scene = useMemo<SceneApi>(
     () => ({
@@ -82,53 +93,55 @@ export default function ThreeLayout({ bootstrap, children }: { bootstrap: Bootst
 
   return (
     <SceneContext.Provider value={scene}>
-      <div className={styles.shell} data-scene={failed ? "off" : "on"}>
-        <SmoothScroll />
-        {/* The engine mounts its own <canvas> in here (see useSceneEngine). */}
-        <div ref={sceneHost} className={styles.canvas} aria-hidden />
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
+      <DiveContext.Provider value={dive}>
+        <div className={styles.shell} data-scene={failed ? "off" : "on"}>
+          <SmoothScroll />
+          {/* The engine mounts its own <canvas> in here (see useSceneEngine). */}
+          <div ref={sceneHost} className={styles.canvas} aria-hidden />
+          <a className="skip-link" href="#main">
+            Skip to content
+          </a>
 
-        <header className={styles.header}>
-          <div className={styles.headerInner}>
-            <Link to="/" className={styles.brand} aria-label={`${bootstrap.profile.full_name}, home`}>
-              <span className={styles.monogram} aria-hidden>
-                {initials}
-              </span>
-              <span>{bootstrap.profile.full_name}</span>
-            </Link>
-            <div className={styles.controls}>
-              <ModeSwitcher compact />
-              <ThemeToggle />
+          <header className={styles.header}>
+            <div className={styles.headerInner}>
+              <Link to="/" className={styles.brand} aria-label={`${bootstrap.profile.full_name}, home`}>
+                <span className={styles.monogram} aria-hidden>
+                  {initials}
+                </span>
+                <span>{bootstrap.profile.full_name}</span>
+              </Link>
+              <div className={styles.controls}>
+                <ModeSwitcher compact />
+                <ThemeToggle />
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {home && stations.length > 1 ? <CallStack items={stations.map((s) => ({ key: s.key, title: s.meta.title }))} active={active} /> : null}
-        <ReadoutChip data={readout} />
+          {home && stations.length > 1 ? <CallStack items={stations.map((s) => ({ key: s.key, title: s.meta.title }))} active={active} /> : null}
+          <ReadoutChip data={readout} />
 
-        <main id="main" className={styles.main}>
-          {children}
-        </main>
+          <main id="main" className={styles.main}>
+            {children}
+          </main>
 
-        <footer className={styles.footer}>
-          <p>
-            © {new Date().getFullYear()} {bootstrap.profile.full_name}
-            {bootstrap.site.footer_note ? ` — ${bootstrap.site.footer_note}` : ""}
-          </p>
-          <SocialLinks links={bootstrap.social_links} />
-        </footer>
+          <footer className={styles.footer}>
+            <p>
+              © {new Date().getFullYear()} {bootstrap.profile.full_name}
+              {bootstrap.site.footer_note ? ` — ${bootstrap.site.footer_note}` : ""}
+            </p>
+            <SocialLinks links={bootstrap.social_links} />
+          </footer>
 
-        {failed ? (
-          <p className={styles.notice} role="status">
-            The 3D scene couldn't start on this device, so you're seeing the content only.
-            <Button size="sm" variant="secondary" onClick={() => setMode("simple")}>
-              Use Simple mode
-            </Button>
-          </p>
-        ) : null}
-      </div>
+          {failed ? (
+            <p className={styles.notice} role="status">
+              The 3D scene couldn't start on this device, so you're seeing the content only.
+              <Button size="sm" variant="secondary" onClick={() => setMode("simple")}>
+                Use Simple mode
+              </Button>
+            </p>
+          ) : null}
+        </div>
+      </DiveContext.Provider>
     </SceneContext.Provider>
   );
 }
