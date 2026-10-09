@@ -4,12 +4,26 @@
     {
       "src": "/api/(.*)",
       "dest": "${VITE_DEV_BACKEND}/api/$1",
-      "env": ["VITE_DEV_BACKEND"]
+      "env": ["VITE_DEV_BACKEND"],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "delete",
+          "target": { "key": "x-forwarded-host" }
+        }
+      ]
     },
     {
       "src": "/media/(.*)",
       "dest": "${VITE_DEV_BACKEND}/media/$1",
-      "env": ["VITE_DEV_BACKEND"]
+      "env": ["VITE_DEV_BACKEND"],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "delete",
+          "target": { "key": "x-forwarded-host" }
+        }
+      ]
     }
   ],
   "rewrites": [
