@@ -1,0 +1,27 @@
+.screen {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--gutter);
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+/* A single span filling, like the first frame of the hero trace. */
+.bar {
+  width: min(16rem, 60vw);
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--flame-1), var(--flame-3)) 0 0 / 0% 100% no-repeat, var(--line);
+  animation: fill 1.2s var(--ease-in-out) infinite;
+}
+
+@keyframes fill {
+  to {
+    background-size:
+      100% 100%,
+      auto;
+  }
+}

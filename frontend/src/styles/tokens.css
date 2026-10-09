@@ -1,0 +1,144 @@
+/*
+ * Design tokens.
+ *
+ * Two independent axes on <html>:
+ *   data-theme = dark | light      → colour tokens
+ *   data-mode  = simple | terminal | 3d → typography / shape / motion tokens
+ *
+ * Components only ever read tokens (var(--…)); they never branch on theme or
+ * mode themselves. That is what lets one component render correctly in all
+ * 3 modes × 2 themes.
+ *
+ * Palette rationale: deep "Prussian" ink + cool paper, with a profiler
+ * flame-graph ramp (amber → rust) as the only warm colour, and "cache blue"
+ * for links and focus. `--signal` is overridden at runtime by the owner's
+ * accent colour (SiteConfig.accent_color).
+ */
+
+:root {
+  /* Flame ramp — shared by both themes; used as fills, never as body text. */
+  --flame-1: #f2c14e;
+  --flame-2: #e8a33d;
+  --flame-3: #d9782d;
+  --flame-4: #b4532a;
+  --signal: var(--flame-2);
+  --on-flame: #10202f;
+
+  /* Typography */
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-body: var(--font-sans);
+  --font-display: var(--font-sans);
+
+  /* Modular scale (1.25, major third) on a 17px base */
+  --step--2: 0.694rem;
+  --step--1: 0.833rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.563rem;
+  --step-3: 1.953rem;
+  --step-4: 2.441rem;
+  --step-5: clamp(2.441rem, 1.6rem + 3.6vw, 3.815rem);
+  --step-hero: clamp(3rem, 1.2rem + 8.4vw, 8.4rem);
+  --leading-body: 1.62;
+  --leading-tight: 1.08;
+  --measure: 66ch;
+
+  /* Space (4px grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+  --page-max: 76rem;
+
+  /* Shape: radius encodes hierarchy (controls < panels < sheets) */
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --radius-sheet: 18px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-med: 280ms;
+
+  --header-h: 64px;
+  --z-header: 50;
+  --z-sudo: 60;
+  --z-overlay: 80;
+  --z-toast: 90;
+}
+
+/* ---------------------------------------------------------------- themes */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1c2c;
+  --bg-raised: #10263a;
+  --bg-sunken: #081624;
+  --ink: #e6ecf2;
+  --ink-muted: #9ab0c3;
+  --ink-faint: #6d8599;
+  --line: rgb(230 236 242 / 0.12);
+  --line-strong: rgb(230 236 242 / 0.24);
+  --link: #8ab8f2;
+  --focus: #8ab8f2;
+  --danger: #ff8a7a;
+  --success: #7fd4a8;
+  --scrim: rgb(4 12 20 / 0.66);
+  --shadow-sheet: 0 24px 60px rgb(0 0 0 / 0.45);
+  /* Chart marks: validated (dataviz validate_palette) against --bg-raised. */
+  --chart-mark: var(--flame-3);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #eef2f5;
+  --bg-raised: #f8fafc;
+  --bg-sunken: #e2e8ee;
+  --ink: #0e2236;
+  --ink-muted: #44596d;
+  --ink-faint: #6b7f92;
+  --line: rgb(14 34 54 / 0.12);
+  --line-strong: rgb(14 34 54 / 0.26);
+  --link: #2459a8;
+  --focus: #2459a8;
+  --danger: #b3261e;
+  --success: #1f7a4d;
+  --scrim: rgb(14 34 54 / 0.42);
+  --shadow-sheet: 0 24px 60px rgb(14 34 54 / 0.18);
+  --chart-mark: var(--flame-4);
+}
+
+/* ----------------------------------------------------------------- modes */
+
+[data-mode="terminal"] {
+  --font-body: var(--font-mono);
+  --font-display: var(--font-mono);
+  --radius-control: 0;
+  --radius-panel: 0;
+  --radius-sheet: 0;
+  --leading-body: 1.55;
+  --header-h: 52px;
+}
+
+/* 3D: content floats over the WebGL canvas, so keep the header compact and the rhythm airy. */
+[data-mode="3d"] {
+  --header-h: 60px;
+  --radius-panel: 14px;
+  --leading-body: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-med: 0ms;
+  }
+}

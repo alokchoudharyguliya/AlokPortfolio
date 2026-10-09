@@ -1,0 +1,179 @@
+/*
+ * Cockpit layers. The interior is always dark (it is the inside of a car), with the
+ * owner's accent as trim, so it reads the same in the day and night drive.
+ * --steer (−1…1), --speed (0…1), --boost, --crash are written by the render loop.
+ */
+.cockpit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  --steer: 0;
+  --speed: 0;
+  --boost: 0;
+  --crash: 0;
+  --dh: clamp(160px, 34vh, 360px);
+}
+
+/* The drawing is 10:3. It is as tall as --dh and at least as wide as the screen; on a narrow (portrait)
+   screen it is wider than the screen and centred, so the gauges and wheel keep their size and only the
+   outer dashboard is cropped. */
+.dash {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  min-width: calc(var(--dh) * 3.334);
+  height: var(--dh);
+  overflow: visible;
+  filter: drop-shadow(0 -10px 24px rgb(0 0 0 / 0.35));
+}
+
+/* Steering wheel turns about the centre of its circle (below the visible area). */
+.wheel {
+  transform-origin: 500px 372px;
+  transform: rotate(calc(var(--steer) * 75deg));
+  transition: transform 40ms linear;
+}
+
+.needle {
+  transform-origin: 500px 150px;
+  transform: rotate(calc(-135deg + var(--speed) * 270deg * 1.02));
+}
+
+.speedNumber {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 700;
+  fill: #e6ecf2;
+}
+
+.speedUnit {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  fill: #7e93a8;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  fill: var(--signal);
+  opacity: 0;
+}
+
+.tagOn {
+  opacity: 1;
+}
+
+.turn {
+  fill: #223142;
+}
+
+/* Indicators blink when the wheel is turned hard (data-turn is set by the loop). */
+.cockpit[data-turn="left"] .turnLeft,
+.cockpit[data-turn="right"] .turnRight {
+  fill: var(--success);
+  animation: blink 0.7s steps(2, jump-none) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Roof edge, mirror, pillars frame the windscreen. */
+.roof {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(34px, 8vh, 90px);
+  background: linear-gradient(#070a0f, #0c131b);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 86% 100%, 14% 100%, 0 62%);
+  border-bottom: 2px solid var(--signal);
+}
+
+.mirror {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: clamp(120px, 20vw, 260px);
+  height: clamp(26px, 5vh, 52px);
+  transform: translate(-50%, -34%);
+  background: #0a0f15;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.45);
+}
+
+.mirrorGlass {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--signal) 14%, #1a2a3a), #0a1420 70%);
+  opacity: 0.85;
+}
+
+.pillar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(40px, 12vw, 170px);
+  background: linear-gradient(#070a0f, #101821 60%, #0b1017);
+}
+
+.left {
+  left: 0;
+  clip-path: polygon(0 0, 100% 0, 38% 78%, 0 100%);
+}
+
+.right {
+  right: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 62% 78%);
+}
+
+/* Crash flash and boost streaks sit over everything except the panels. */
+.crash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgb(255 60 40 / 0.6));
+  opacity: calc(var(--crash) * 0.8);
+}
+
+.speedLines {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: repeating-conic-gradient(from 0deg at 50% 46%, transparent 0 4deg, rgb(255 255 255 / 0.1) 4deg 4.6deg);
+  mask-image: radial-gradient(ellipse at 50% 46%, transparent 25%, #000 85%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 46%, transparent 25%, #000 85%);
+  transition: opacity 0.25s;
+}
+
+.on {
+  opacity: 1;
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .cockpit {
+    --dh: 40vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel {
+    transition: none;
+  }
+
+  .cockpit[data-turn] .turn {
+    animation: none;
+  }
+
+  .crash {
+    opacity: 0;
+  }
+}

@@ -1,0 +1,751 @@
+/*
+ * Drive mode layout. Stacking, bottom to top:
+ *   canvas (0) · cockpit (1) · touch zones (3) · header / HUD (4) · panels (6) · detail overlay (7) · loading (20)
+ * --dash-h is the height of the dashboard so HUD pieces can sit just above it.
+ */
+.shell {
+  --dash-h: clamp(160px, 34vh, 360px);
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #05080c;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ------------------------------------------------------------------ header */
+
+.header {
+  position: fixed;
+  z-index: 4;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: calc(var(--space-3) + env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.header > * {
+  pointer-events: auto;
+}
+
+.brand,
+.controls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: color-mix(in srgb, var(--bg) 66%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.brand {
+  padding: 4px var(--space-4) 4px 4px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  font-stretch: 88%;
+}
+
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--signal);
+  color: var(--on-flame);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+}
+
+.controls {
+  padding: 3px 6px 3px 3px;
+}
+
+@media (max-width: 520px) {
+  .brandName {
+    display: none;
+  }
+
+  .brand {
+    padding-right: 4px;
+  }
+}
+
+/* --------------------------------------------------------------------- HUD */
+
+.strip {
+  position: fixed;
+  z-index: 4;
+  top: calc(var(--space-3) + env(safe-area-inset-top) + 50px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(34rem, calc(100vw - 2 * var(--space-5)));
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.stripTrack {
+  position: relative;
+  list-style: none;
+  height: 12px;
+  margin: 0 6px;
+}
+
+.stripTrack::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 2px;
+  background: var(--line-strong);
+}
+
+.stop {
+  position: absolute;
+  top: 1px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--ink-faint);
+}
+
+.stop.visited {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.stop.current {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 45%, transparent);
+}
+
+.carDot {
+  position: absolute;
+  top: -1px;
+  width: 0;
+  height: 0;
+  margin-left: -6px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid var(--ink);
+  transition: left 120ms linear;
+}
+
+.next {
+  position: fixed;
+  z-index: 4;
+  top: calc(var(--space-3) + env(safe-area-inset-top) + 102px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-1) var(--space-4);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.nextName {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.nextDist {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.nextNear .nextName {
+  color: var(--signal);
+}
+
+.chip {
+  position: fixed;
+  z-index: 4;
+  top: calc(var(--space-3) + env(safe-area-inset-top) + 50px);
+  left: max(var(--gutter), env(safe-area-inset-left));
+  display: grid;
+  gap: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.chip strong {
+  color: var(--ink);
+}
+
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+  .chip {
+    display: none;
+  }
+}
+
+/* Short landscape phones: keep the HUD to one slim row so the road stays visible. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .strip {
+    top: calc(var(--space-3) + env(safe-area-inset-top) + 2px);
+    width: min(26rem, calc(100vw - 36rem));
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .next {
+    top: calc(var(--space-3) + env(safe-area-inset-top) + 48px);
+  }
+}
+
+.hint {
+  position: fixed;
+  z-index: 4;
+  left: 50%;
+  bottom: calc(var(--dash-h) + var(--space-4));
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink);
+  white-space: pre;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.hintOn {
+  opacity: 1;
+}
+
+/* On small screens the controls hint goes up top, clear of the touch circles above the dashboard. */
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+  .hint {
+    bottom: auto;
+    top: calc(var(--space-3) + env(safe-area-inset-top) + 142px);
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .hint {
+    top: calc(var(--space-3) + env(safe-area-inset-top) + 86px);
+  }
+}
+
+/* ------------------------------------------------------------ touch controls */
+
+.zones {
+  position: fixed;
+  z-index: 3;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.zone {
+  position: absolute;
+  bottom: calc(var(--dash-h) + var(--space-4));
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  background: color-mix(in srgb, var(--bg) 35%, transparent);
+  font-size: 44px;
+  line-height: 1;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  transition: background-color 80ms, transform 80ms;
+}
+
+.zoneLeft {
+  left: max(var(--space-4), env(safe-area-inset-left));
+}
+
+.zoneRight {
+  right: max(var(--space-4), env(safe-area-inset-right));
+}
+
+.zoneOn {
+  background: color-mix(in srgb, var(--signal) 55%, transparent);
+  transform: scale(1.08);
+}
+
+@media (pointer: fine) {
+  .zone {
+    display: none;
+  }
+}
+
+.pedals {
+  position: fixed;
+  z-index: 4;
+  inset-inline: 0;
+  bottom: calc(var(--dash-h) - 46px);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 max(var(--space-4), env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.pedal {
+  pointer-events: auto;
+  touch-action: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  color: var(--ink);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.pedal:active {
+  background: color-mix(in srgb, var(--signal) 55%, transparent);
+}
+
+.gas {
+  border-color: var(--signal);
+}
+
+/* ------------------------------------------------------------------ panels */
+
+.panelWrap {
+  position: fixed;
+  z-index: 6;
+  top: calc(var(--space-3) + env(safe-area-inset-top) + 56px);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  width: min(44rem, 48vw);
+  display: flex;
+}
+
+.panelWrap[data-side="right"] {
+  right: max(var(--gutter), env(safe-area-inset-right));
+}
+
+.panelWrap[data-side="left"] {
+  left: max(var(--gutter), env(safe-area-inset-left));
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  outline: none;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sheet);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  animation: panelIn 340ms var(--ease-out);
+}
+
+.panelScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1.1rem, 0.8rem + 1.4vw, 2rem);
+}
+
+/* In edit mode the section toolbar sits above its section: leave room for it. */
+.panelEditing .panelScroll {
+  padding-top: 3.6rem;
+}
+
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-raised) 80%, transparent);
+}
+
+.go {
+  gap: var(--space-3);
+}
+
+.kbd,
+.controlsHelp kbd {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.kbd:empty {
+  display: none;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--signal);
+  margin-bottom: var(--space-3);
+}
+
+/* Reused Simple sections: drop their page-level chrome so they sit inside the panel. */
+.panel section {
+  min-width: 0;
+}
+
+.panel section[id] {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0;
+  border-top: 0;
+  gap: var(--space-5);
+}
+
+.panel section[id] > header {
+  position: static;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+/* Phones in portrait: a bottom sheet. */
+@media (max-width: 760px) {
+  .panelWrap {
+    top: auto;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0;
+    width: 100%;
+    height: min(76dvh, 40rem);
+  }
+
+  .panel {
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    border-bottom: 0;
+  }
+}
+
+/* Phones in landscape: a full-height side panel so the road stays visible. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .panelWrap {
+    top: 0;
+    bottom: 0;
+    left: auto !important;
+    right: 0 !important;
+    width: min(56vw, 34rem);
+    height: auto;
+  }
+
+  .panel {
+    border-radius: 0;
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+  }
+}
+
+/* --------------------------------------------------------------- hero panel */
+
+.hero {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.heroName {
+  font-size: clamp(2.4rem, 1.4rem + 4.4vw, 4.6rem);
+  font-weight: 650;
+  font-stretch: 76%;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+
+.heroHeadline {
+  font-size: var(--step-2);
+  font-weight: 600;
+  font-stretch: 88%;
+  line-height: 1.15;
+}
+
+.heroTagline {
+  color: var(--ink-muted);
+  max-width: 46ch;
+}
+
+.controlsHelp {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-panel);
+  font-size: var(--step--1);
+}
+
+.controlsHelp ul {
+  list-style: none;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.controlsHelp kbd {
+  margin-inline: 2px;
+}
+
+.helpNote {
+  color: var(--ink-muted);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ------------------------------------------------------------------ finish */
+
+.finishTitle {
+  font-size: var(--step-5);
+  font-stretch: 80%;
+  margin-bottom: var(--space-3);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-5) 0;
+}
+
+.stats dt {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--step-3);
+  color: var(--signal);
+  font-variant-numeric: tabular-nums;
+}
+
+.board {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.nameForm {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 20rem;
+}
+
+.boardList {
+  list-style: none;
+  display: grid;
+  max-width: 24rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+}
+
+.boardList li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.boardList li:last-child {
+  border-bottom: 0;
+}
+
+/* -------------------------------------------------------------------- menu */
+
+.menu {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.menuGroup {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.menuHead {
+  font-size: var(--step-1);
+}
+
+.menuNote {
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+}
+
+.menuRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.routeList {
+  list-style: none;
+  display: grid;
+  margin-top: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+
+.routeItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+}
+
+.routeList li:last-child .routeItem {
+  border-bottom: 0;
+}
+
+.routeItem:hover {
+  background: var(--bg-raised);
+}
+
+.routeHere {
+  background: var(--bg-raised);
+  box-shadow: inset 3px 0 0 var(--signal);
+}
+
+.routeDot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-faint);
+}
+
+.routeDone {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.routeName {
+  flex: 1;
+  font-weight: 600;
+}
+
+.routeNote {
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+}
+
+/* ---------------------------------------------------------- detail + overlay */
+
+.detail {
+  position: fixed;
+  z-index: 7;
+  inset: 0;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.detailInner {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: calc(var(--space-8) + env(safe-area-inset-top)) var(--gutter) var(--space-9);
+}
+
+.backToRoad {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  font-weight: 600;
+}
+
+.overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--gutter);
+  text-align: center;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  color: var(--ink-muted);
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--line-strong);
+  border-top-color: var(--signal);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+
+  .spinner {
+    animation-duration: 3s;
+  }
+}

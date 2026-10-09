@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-mode="simple">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Alok Choudhary — AI Systems & Software Engineer</title>
+    <meta
+      name="description"
+      content="Software engineer focused on backend systems, AI/ML, LLM inference, GPU computing and performance engineering."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Apply the stored theme/mode before first paint to avoid a flash.
+      // Mirrors lib/preferences/storage.ts (keys and fallbacks).
+      (function () {
+        try {
+          var d = document.documentElement;
+          var t = localStorage.getItem("pf.theme");
+          var m = new URLSearchParams(location.search).get("mode") || localStorage.getItem("pf.mode");
+          if (t !== "light" && t !== "dark") {
+            t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          }
+          d.dataset.theme = t;
+          if (m === "simple" || m === "terminal" || m === "3d" || m === "drive") d.dataset.mode = m;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

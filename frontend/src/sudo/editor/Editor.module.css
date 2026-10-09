@@ -1,0 +1,27 @@
+.muted {
+  color: var(--ink-muted);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.footerStart {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-right: auto;
+}
+
+.historyLink {
+  font-size: var(--step--1);
+}
+
+@media (max-width: 480px) {
+  .footer {
+    flex-wrap: wrap;
+  }
+}

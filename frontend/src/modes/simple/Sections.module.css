@@ -1,0 +1,547 @@
+/*
+ * Simple-mode section styles.
+ * Layout: on wide screens each section is a two-column grid — a sticky
+ * heading column on the left and the content on the right — so the eye can
+ * scan section names down the page like a table of contents. On narrow
+ * screens it collapses to a single column.
+ */
+
+.section,
+.sectionWide {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1fr) minmax(0, 3fr);
+  gap: var(--space-5) var(--space-7);
+  padding: var(--space-8) 0;
+  border-top: 1px solid var(--line);
+}
+
+.sectionHead {
+  align-self: start;
+  position: sticky;
+  top: calc(var(--header-h) + var(--space-5));
+  display: grid;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  font-size: var(--step-3);
+  font-stretch: 82%;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.sectionSubtitle {
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+  max-width: 22ch;
+}
+
+.sectionBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.sectionWide .sectionBody {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 860px) {
+  .section,
+  .sectionWide {
+    /* minmax(0, …) so wide children (code blocks) scroll instead of stretching the page */
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-7) 0;
+    gap: var(--space-5);
+  }
+
+  .sectionHead {
+    position: static;
+  }
+
+  .sectionSubtitle {
+    max-width: none;
+  }
+}
+
+/* ---------------------------------------------------------------- shared */
+
+.lead {
+  font-size: var(--step-1);
+  line-height: 1.55;
+}
+
+.lead pre {
+  font-size: var(--step--1);
+}
+
+.subhead {
+  font-size: var(--step-1);
+  margin-bottom: var(--space-3);
+}
+
+.philosophy {
+  padding-top: var(--space-5);
+  border-top: 1px dashed var(--line);
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+.body {
+  max-width: var(--measure);
+}
+
+.empty {
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+
+.itemTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.when {
+  color: var(--ink-faint);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}
+
+.org {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-muted);
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.bullets {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: 1.1em;
+  max-width: var(--measure);
+}
+
+.bullets li::marker {
+  color: var(--signal);
+}
+
+.plainList {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+}
+
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.tags li {
+  padding: 1px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.socials {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.social {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+
+.social:hover {
+  color: var(--ink);
+  background: var(--bg-raised);
+}
+
+.stack {
+  list-style: none;
+  display: grid;
+  gap: var(--space-6);
+}
+
+.stack > li {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* ------------------------------------------------------------ focus areas */
+
+.focusGrid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-6) var(--space-5);
+}
+
+.focus {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+}
+
+.focusRule {
+  width: 2.5rem;
+  height: 4px;
+  border-radius: 2px;
+  margin-bottom: var(--space-2);
+}
+
+/* ------------------------------------------------------------- timeline */
+
+.timeline {
+  position: relative;
+  padding-left: var(--space-6);
+}
+
+.spineTrack {
+  position: absolute;
+  left: 5px;
+  top: 0.6em;
+  bottom: 0.6em;
+  width: 2px;
+  background: var(--line);
+}
+
+.spine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--flame-1), var(--flame-3));
+  transform-origin: top center;
+}
+
+.timelineList {
+  list-style: none;
+  display: grid;
+  gap: var(--space-7);
+}
+
+.timelineItem {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.timelineItem::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--space-6) + 1px);
+  top: 0.35em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--signal);
+}
+
+/* ------------------------------------------------------------- projects */
+
+.featured {
+  list-style: none;
+  display: grid;
+  gap: var(--space-7);
+}
+
+.project {
+  display: grid;
+  gap: var(--space-3);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--line);
+}
+
+.projectHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.projectTitle {
+  font-size: var(--step-3);
+  font-stretch: 84%;
+  font-weight: 620;
+}
+
+.projectTitle a {
+  color: var(--ink);
+  text-decoration: none;
+  background: linear-gradient(var(--signal), var(--signal)) 0 100% / 0 2px no-repeat;
+  transition: background-size var(--dur-med) var(--ease-out);
+}
+
+.projectTitle a:hover,
+.projectTitle a:focus-visible {
+  background-size: 100% 2px;
+}
+
+.status {
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+}
+
+.status[data-status="in_progress"] {
+  color: var(--signal);
+}
+
+/* Measurements read like profiler counters. */
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  margin: 0;
+}
+
+.metrics div {
+  display: grid;
+}
+
+.metrics dt {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.metrics dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--step-2);
+  color: var(--signal);
+}
+
+.projectFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.projectLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--step--1);
+  font-weight: 550;
+}
+
+.projectLinks a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.compactList {
+  list-style: none;
+  display: grid;
+}
+
+.compactRow {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) 2fr;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.compactTitle {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .compactRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------------- skills */
+
+.skills {
+  display: grid;
+  margin: 0;
+}
+
+.skillRow {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) 3fr;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.skillRow dd {
+  margin: 0;
+}
+
+.skillCat {
+  font-weight: 600;
+}
+
+.skillList {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--ink-muted);
+}
+
+.skillList li[data-highlight] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.skillList li[data-hidden] {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.skillEdit {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .skillRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------- achievements */
+
+.achievements {
+  list-style: none;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.achievement {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: var(--space-4);
+}
+
+.kind {
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+  padding-top: 0.25em;
+}
+
+@media (max-width: 520px) {
+  .achievement {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+}
+
+/* ----------------------------------------------------------------- blog */
+
+.posts {
+  list-style: none;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.postRow {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.postTitle {
+  font-size: var(--step-1);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* -------------------------------------------------------------- contact */
+
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--space-6);
+}
+
+.contactAside {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.email {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.contactForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.sent {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  justify-items: start;
+}
+
+@media (max-width: 860px) {
+  .contact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .contactForm {
+    grid-template-columns: 1fr;
+  }
+}

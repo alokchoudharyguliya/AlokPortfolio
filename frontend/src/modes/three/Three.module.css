@@ -1,0 +1,684 @@
+/*
+ * 3D mode styles. The WebGL canvas is fixed behind everything; content sits
+ * in translucent "glass" panels that alternate sides so the scene stays
+ * visible beside the text. Only design tokens are used, so both themes work.
+ */
+
+.shell {
+  position: relative;
+  min-height: 100dvh;
+  isolation: isolate;
+}
+
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Without WebGL the page keeps a quiet gradient instead of the scene. */
+.shell[data-scene="off"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60rem 40rem at 80% 10%, color-mix(in srgb, var(--flame-2) 14%, transparent), transparent 70%),
+    radial-gradient(50rem 40rem at 10% 90%, color-mix(in srgb, var(--link) 12%, transparent), transparent 70%),
+    var(--bg);
+}
+
+/* ----------------------------------------------------------------- header */
+
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: var(--z-header);
+  padding-top: env(safe-area-inset-top);
+  pointer-events: none;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  height: var(--header-h);
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 max(var(--gutter), env(safe-area-inset-left)) 0 max(var(--gutter), env(safe-area-inset-right));
+}
+
+.headerInner > * {
+  pointer-events: auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 66%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--signal);
+  color: var(--on-flame);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 66%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+}
+
+/* ------------------------------------------------------------------- main */
+
+.main {
+  position: relative;
+  z-index: 1;
+}
+
+.station {
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: calc(var(--header-h) + var(--space-6)) var(--gutter) var(--space-7);
+}
+
+.station[data-side="left"] {
+  justify-content: flex-start;
+}
+
+.station[data-side="right"] {
+  justify-content: flex-end;
+}
+
+.glass {
+  position: relative;
+  width: min(100%, 46rem);
+  padding: clamp(1.25rem, 1rem + 1.6vw, 2.25rem);
+  background: color-mix(in srgb, var(--bg) 76%, transparent);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sheet);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+}
+
+.glass.wide {
+  width: min(100%, 60rem);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .brand,
+  .controls {
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+  }
+}
+
+/* Reused Simple sections: drop their page-level chrome so they sit inside the panel. */
+.glass section {
+  min-width: 0;
+}
+
+.glass section[id] {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0;
+  border-top: 0;
+  gap: var(--space-5);
+}
+
+.glass section[id] > header {
+  position: static;
+}
+
+.panelHead {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.panelTitle {
+  font-size: var(--step-3);
+  font-stretch: 82%;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.panelSub {
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+  max-width: 48ch;
+}
+
+/* ------------------------------------------------------------------- hero */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: center;
+  gap: var(--space-5);
+  min-height: 100svh;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: calc(var(--header-h) + var(--space-6)) var(--gutter) var(--space-7);
+}
+
+/* A soft scrim keeps the headline readable over the brightest part of the scene. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 35% 0 0;
+  z-index: -1;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 82%, transparent) 30%, transparent);
+  pointer-events: none;
+}
+
+.heroCopy {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 40rem;
+}
+
+.heroName {
+  font-size: var(--step-hero);
+  font-stretch: 78%;
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.heroTag {
+  max-width: 34rem;
+  font-size: var(--step-1);
+  color: var(--ink-muted);
+}
+
+.trace {
+  display: grid;
+  gap: 0;
+  max-width: 30rem;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  border-left: 2px solid var(--signal);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.trace li {
+  display: flex;
+  gap: var(--space-3);
+  padding: 2px 0;
+  color: var(--ink-muted);
+}
+
+.trace li[aria-current="true"] {
+  color: var(--signal);
+  font-weight: 600;
+}
+
+.traceIdx {
+  flex: none;
+  min-width: 2.2ch;
+  color: var(--ink-faint);
+}
+
+.traceCaption {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.availability {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 60%, transparent);
+  animation: ping 2s var(--ease-out) infinite;
+}
+
+@keyframes ping {
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+.cue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+  text-decoration: none;
+}
+
+.cueArrow {
+  display: inline-block;
+}
+
+/* --------------------------------------------------------- experience etc. */
+
+.pipeline {
+  position: relative;
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0 0 0 var(--space-7);
+  list-style: none;
+}
+
+.pipeline::before {
+  content: "";
+  position: absolute;
+  left: 1.05rem;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 2px;
+  background: linear-gradient(var(--flame-1), var(--flame-3), transparent);
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.node {
+  position: absolute;
+  left: calc(-1 * var(--space-7));
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 2px solid var(--signal);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--signal);
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+}
+
+.when {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+}
+
+.itemTitle {
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.org {
+  color: var(--ink-muted);
+}
+
+.body {
+  max-width: var(--measure);
+}
+
+.bullets {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: 1.1em;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--bg-raised) 70%, transparent);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-med) var(--ease-out);
+}
+
+.card:hover,
+.card:focus-within {
+  border-color: var(--signal);
+  transform: translateY(-3px);
+}
+
+.cardInner {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.tile {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: 0.08em;
+  color: var(--signal);
+}
+
+.cardTitle {
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cardTitle a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.cardTitle a:hover {
+  color: var(--signal);
+}
+
+.metrics {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--step--1);
+}
+
+.metrics div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px dashed var(--line);
+}
+
+.metrics dt {
+  color: var(--ink-muted);
+}
+
+.metrics dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.tiers {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tier {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--line-strong);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.tier:hover,
+.tier:focus-within {
+  border-left-color: var(--signal);
+}
+
+.tierLabel {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.chips li[data-hot="true"] {
+  color: var(--ink);
+  border-color: var(--signal);
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------------- detail pages */
+
+.detail {
+  display: flex;
+  justify-content: center;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: calc(var(--header-h) + var(--space-6)) var(--gutter) var(--space-8);
+  min-height: 100svh;
+}
+
+.detail > .glass {
+  width: min(100%, 52rem);
+  align-self: flex-start;
+}
+
+/* -------------------------------------------------------------------- HUD */
+
+.rail {
+  position: fixed;
+  right: max(var(--gutter), env(safe-area-inset-right));
+  top: 50%;
+  z-index: var(--z-header);
+  transform: translateY(-50%);
+  display: none;
+  margin: 0;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.railItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 3px 0;
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.railItem:hover {
+  color: var(--ink);
+}
+
+.railItem[aria-current="location"] {
+  color: var(--signal);
+  font-weight: 600;
+}
+
+.railMark {
+  width: 1ch;
+  text-align: center;
+}
+
+.readout {
+  position: fixed;
+  right: max(var(--gutter), env(safe-area-inset-right));
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: var(--z-header);
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.readout strong {
+  min-width: 2ch;
+  color: var(--signal);
+  font-weight: 600;
+  text-align: right;
+}
+
+.notice {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: var(--z-sudo);
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: calc(100vw - 2 * var(--space-4));
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--step--1);
+  background: var(--bg-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--gutter) calc(var(--space-8) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-4);
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+}
+
+@media (min-width: 1180px) {
+  .rail {
+    display: block;
+  }
+}
+
+/* --------------------------------------------------------------- small screens */
+
+@media (max-width: 860px) {
+  .station {
+    min-height: auto;
+    padding-block: var(--space-7);
+  }
+
+  .station:first-of-type {
+    padding-top: calc(var(--header-h) + var(--space-6));
+  }
+
+  .glass {
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+  }
+
+  .pipeline {
+    padding-left: var(--space-6);
+  }
+
+  .node {
+    left: calc(-1 * var(--space-6));
+  }
+
+  .brand span:last-child {
+    display: none;
+  }
+}
+
+/* Landscape phones: short viewports shouldn't force full-height stations. */
+@media (max-height: 520px) {
+  .station,
+  .hero {
+    min-height: auto;
+  }
+}

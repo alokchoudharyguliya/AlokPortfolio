@@ -1,0 +1,61 @@
+.region {
+  position: relative;
+  outline: 1px dashed color-mix(in srgb, var(--signal) 55%, transparent);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
+.section {
+  outline-offset: 12px;
+  margin-top: var(--space-7);
+}
+
+/* Edit mode reserves a strip above each item for its tools, so they never
+   cover the item's own content (status labels, links). */
+.item {
+  outline-color: var(--line-strong);
+  padding-top: 44px;
+}
+
+.item:hover,
+.item:focus-within {
+  outline-color: var(--signal);
+}
+
+.hidden {
+  opacity: 0.55;
+}
+
+.toolbar {
+  position: absolute;
+  top: calc(-1 * var(--space-7) - 2px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  z-index: 2;
+}
+
+.badge {
+  padding: 2px var(--space-2);
+  border-radius: 4px;
+  background: var(--signal);
+  color: var(--on-flame);
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+}
+
+.itemTools {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: var(--space-1);
+  z-index: 3;
+}
+
+.itemTools button {
+  background: var(--bg);
+}
