@@ -12,7 +12,7 @@ class SkillSerializer(serializers.ModelSerializer):
 class SkillCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SkillCategory
-        fields = ["id", "name", "description", "icon", "order", "is_published"]
+        fields = ["id", "name", "description", "icon", "exhibit", "order", "is_published"]
 
 
 class PublicSkillCategorySerializer(SkillCategorySerializer):

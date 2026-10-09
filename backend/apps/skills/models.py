@@ -5,9 +5,22 @@ from apps.core.models import OrderableModel, PublishableModel, TimeStampedModel
 
 
 class SkillCategory(OrderableModel, PublishableModel, TimeStampedModel):
+    # Keep in sync with EXHIBITS in frontend/src/modes/three/exhibits/catalog.ts.
+    EXHIBIT_CHOICES = [
+        ("hardware", "Hardware: motherboard to registers"),
+        ("cuda", "CUDA: GPU to a single thread"),
+        ("transformer", "Transformer: stack to softmax"),
+    ]
+
     name = models.CharField(max_length=80, unique=True)
     description = models.CharField(max_length=300, blank=True)
     icon = models.CharField(max_length=40, blank=True, help_text="Icon key used by the frontend")
+    exhibit = models.CharField(
+        max_length=24,
+        blank=True,
+        choices=EXHIBIT_CHOICES,
+        help_text="Optional 3D-mode exhibit this group links to (a scroll-driven zoom through the topic)",
+    )
 
     class Meta(OrderableModel.Meta):
         verbose_name_plural = "skill categories"
