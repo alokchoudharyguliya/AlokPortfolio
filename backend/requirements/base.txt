@@ -1,0 +1,15 @@
+# Runtime dependencies (production + development)
+Django==5.2.18
+djangorestframework==3.18.3
+djangorestframework-simplejwt==5.5.1
+drf-spectacular==0.30.0
+django-filter==26.2
+django-cors-headers==4.9.0
+django-otp==1.7.3
+django-environ==0.14.0
+psycopg[binary]==3.3.6
+Pillow==12.3.0
+whitenoise==6.12.0
+gunicorn==26.2.0
+# Optional S3-compatible media storage (Cloudflare R2, AWS S3) — enabled via env vars
+django-storages[s3]==1.14.6
